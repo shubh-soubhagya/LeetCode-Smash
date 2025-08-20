@@ -6,7 +6,7 @@ class Solution {
         for (int t : time) {
             int rem = t % 60;
             int complement = (60 - rem) % 60;
-            res += count[complement];
+            res = res + count[complement];
             count[rem]++;
         }
 
