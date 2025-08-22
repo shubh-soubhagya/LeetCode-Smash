@@ -1,22 +1,22 @@
 class Solution {
     public int findDuplicate(int[] nums) {
-        // Step 1: Use slow and fast pointers
+        // Phase 1: Detect cycle
         int slow = nums[0];
         int fast = nums[0];
-
-        // Phase 1: Detect cycle
         do {
             slow = nums[slow];
             fast = nums[nums[fast]];
         } while (slow != fast);
 
-        // Phase 2: Find the entrance of the cycle (duplicate number)
-        slow = nums[0];
-        while (slow != fast) {
-            slow = nums[slow];
-            fast = nums[fast];
-        }
+        // Phase 2: Find entry point of cycle (the duplicate number)
+        return findEntry(nums, nums[0], slow);
+    }
 
-        return slow; // or fast (both are same here)
+    // Recursive function to find entry point
+    private int findEntry(int[] nums, int ptr1, int ptr2) {
+        if (ptr1 == ptr2) {
+            return ptr1;  // duplicate found
+        }
+        return findEntry(nums, nums[ptr1], nums[ptr2]);  // move both pointers one step
     }
 }
