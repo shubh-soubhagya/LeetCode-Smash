@@ -1,27 +1,22 @@
 class Solution {
     public int findDuplicate(int[] nums) {
-        int low = 1;
-        int high = nums.length - 1; // because numbers are in [1, n]
+        // Phase 1: Detect cycle
+        int slow = nums[0];
+        int fast = nums[0];
+        do {
+            slow = nums[slow];
+            fast = nums[nums[fast]];
+        } while (slow != fast);
 
-        while (low < high) {
-            int mid = (low + high) / 2;
+        // Phase 2: Find entry point of cycle (the duplicate number)
+        return findEntry(nums, nums[0], slow);
+    }
 
-            // Count how many numbers are <= mid
-            int count = 0;
-            for (int num : nums) {
-                if (num <= mid) count++;
-            }
-
-            // If too many numbers are <= mid, duplicate is in [low..mid]
-            if (count > mid) {
-                high = mid;
-            } else {
-                // Otherwise, it's in [mid+1..high]
-                low = mid + 1;
-            }
+    // Recursive function to find entry point
+    private int findEntry(int[] nums, int ptr1, int ptr2) {
+        if (ptr1 == ptr2) {
+            return ptr1;  // duplicate found
         }
-
-        // When low == high, that's our duplicate
-        return low;
+        return findEntry(nums, nums[ptr1], nums[ptr2]);  // move both pointers one step
     }
 }
