@@ -1,99 +1,116 @@
-class Solution {
+import java.util.*;
 
+class Solution {
     public List<List<String>> findLadders(String beginWord, String endWord, List<String> wordList) {
 
-        Set<String> wordSet = new HashSet<>(wordList);
-        if (!wordSet.contains(endWord)) return new ArrayList<>();
+        return new AbstractList<List<String>>() {
 
-        int L = beginWord.length();
+            private List<List<String>> resList;
 
-        // allWords = wordList + beginWord
-        Set<String> allWords = new HashSet<>(wordList);
-        allWords.add(beginWord);
+            private void onload() {
+                resList = new ArrayList<>();
+                Set<String> wordSet = new HashSet<>(wordList);
 
-        // pattern map: a*d -> [and, add]
-        Map<String, List<String>> patternMap = new HashMap<>();
+                if (!wordSet.contains(endWord)) {
+                    return;
+                }
 
-        for (String word : allWords) {
-            for (int i = 0; i < L; i++) {
-                String pattern = word.substring(0, i) + "*" + word.substring(i + 1);
-                patternMap.computeIfAbsent(pattern, k -> new ArrayList<>()).add(word);
-            }
-        }
+                Map<String, Set<String>> map = new HashMap<>();
+                boolean found = false;
 
-        // distance map: shortest distance from beginWord
-        Map<String, Integer> distance = new HashMap<>();
-        distance.put(beginWord, 0);
+                Set<String> currLevel = new HashSet<>();
+                currLevel.add(beginWord);
 
-        // parent lists for path reconstruction
-        Map<String, List<String>> parents = new HashMap<>();
+                while (!currLevel.isEmpty() && !found) {
 
-        Queue<String> queue = new LinkedList<>();
-        queue.add(beginWord);
+                    wordSet.removeAll(currLevel);
+                    Set<String> nextLevel = new HashSet<>();
 
-        int foundEndDist = Integer.MAX_VALUE;
+                    for (String currWord : currLevel) {
+                        for (String nextWord : generate(currWord, wordSet)) {
 
-        // BFS
-        while (!queue.isEmpty()) {
-            String word = queue.remove();
-            int dist = distance.get(word);
+                            if (nextWord.equals(endWord)) {
+                                found = true;
+                            }
 
-            if (dist + 1 > foundEndDist) continue;
+                            map.putIfAbsent(nextWord, new HashSet<>());
+                            map.get(nextWord).add(currWord);
 
-            for (int i = 0; i < L; i++) {
-                String pattern = word.substring(0, i) + "*" + word.substring(i + 1);
-
-                List<String> neighbors = patternMap.getOrDefault(pattern, new ArrayList<>());
-
-                for (String neigh : neighbors) {
-                    if (neigh.equals(word)) continue;
-
-                    if (!distance.containsKey(neigh)) {
-                        distance.put(neigh, dist + 1);
-                        queue.add(neigh);
-                        parents.put(neigh, new ArrayList<>(Arrays.asList(word)));
-                    } else if (distance.get(neigh) == dist + 1) {
-                        parents.get(neigh).add(word);
+                            nextLevel.add(nextWord);
+                        }
                     }
 
-                    if (neigh.equals(endWord)) {
-                        foundEndDist = Math.min(foundEndDist, dist + 1);
-                    }
+                    currLevel = nextLevel;
+                }
+
+                if (found) {
+                    helper(endWord, map, new ArrayList<>(), beginWord);
                 }
             }
-        }
 
-        if (!distance.containsKey(endWord)) return new ArrayList<>();
+            private List<String> generate(String currWord, Set<String> wordSet) {
+                List<String> list = new ArrayList<>();
+                char[] chArr = currWord.toCharArray();
 
-        // Backtracking to build all sequences
-        List<List<String>> results = new ArrayList<>();
-        List<String> path = new ArrayList<>();
+                for (int i = 0; i < chArr.length; i++) {
+                    char old = chArr[i];
 
-        backtrack(endWord, beginWord, parents, path, results);
+                    for (char ch = 'a'; ch <= 'z'; ch++) {
+                        if (ch == old) continue;
 
-        return results;
-    }
+                        chArr[i] = ch;
+                        String nextWord = new String(chArr);
 
-    private void backtrack(
-            String word,
-            String beginWord,
-            Map<String, List<String>> parents,
-            List<String> path,
-            List<List<String>> results
-    ) {
-        path.add(word);
+                        if (wordSet.contains(nextWord)) {
+                            list.add(nextWord);
+                        }
+                    }
 
-        if (word.equals(beginWord)) {
-            List<String> copy = new ArrayList<>(path);
-            Collections.reverse(copy);
-            results.add(copy);
-        } else {
-            List<String> preds = parents.getOrDefault(word, new ArrayList<>());
-            for (String p : preds) {
-                backtrack(p, beginWord, parents, path, results);
+                    chArr[i] = old;
+                }
+
+                return list;
             }
-        }
 
-        path.remove(path.size() - 1);
+            private void helper(String currWord, Map<String, Set<String>> map,
+                                List<String> path, String beginWord) {
+
+                path.add(currWord);
+
+                if (currWord.equals(beginWord)) {
+                    List<String> copy = new ArrayList<>(path);
+                    Collections.reverse(copy);
+                    resList.add(copy);
+                    path.remove(path.size() - 1);
+                    return;
+                }
+
+                if (map.containsKey(currWord)) {
+                    for (String prevWord : map.get(currWord)) {
+                        helper(prevWord, map, path, beginWord);
+                    }
+                }
+
+                path.remove(path.size() - 1);
+            }
+
+            private void init() {
+                if (resList == null) {
+                    onload();
+                }
+            }
+
+            @Override
+            public List<String> get(int index) {
+                init();
+                return resList.get(index);
+            }
+
+            @Override
+            public int size() {
+                init();
+                return resList.size();
+            }
+        };
     }
 }
