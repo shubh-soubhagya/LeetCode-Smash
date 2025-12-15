@@ -1,35 +1,27 @@
 class Solution {
     public int evalRPN(String[] tokens) {
         
-        int returnValue=0;
-        String operators = "+-*/";
+        // int ans = 0;
+        String op = "+-*/";
         Stack<String> stack = new Stack<String>();
 
-        for(String t: tokens){
-            if(!operators.contains(t)){
-                stack.push(t);
+        for(String i : tokens){
+            if(!op.contains(i)){
+                stack.push(i);
             }else{
                 int a = Integer.valueOf(stack.pop());
                 int b = Integer.valueOf(stack.pop());
-                int index = operators.indexOf(t);
+                int j = op.indexOf(i);
 
-                switch(index){
-                    case 0:
-                        stack.push(String.valueOf(a+b));
-                        break;
-                    case 1:
-                        stack.push(String.valueOf(b-a));
-                        break;
-                    case 2: 
-                        stack.push(String.valueOf(a*b));
-                        break;
-                    case 3:
-                        stack.push(String.valueOf(b/a));
-                        break;
+                switch(j){
+                    case 0 : stack.push(String.valueOf(a+b)); break;
+                    case 1 : stack.push(String.valueOf(b-a)); break;
+                    case 2 : stack.push(String.valueOf(a*b)); break;
+                    case 3 : stack.push(String.valueOf(b/a)); break;
                 }
             }
         }
-        returnValue = Integer.valueOf(stack.pop());
-        return returnValue;
+
+        return (Integer.valueOf(stack.pop()));
     }
 }
