@@ -22,7 +22,6 @@ class Solution {
             result = result * 10 + (str.charAt(i) - '0');
             i++;
 
-            // clamp early to avoid overflow
             if (flag == '+' && result > Integer.MAX_VALUE) return Integer.MAX_VALUE;
             if (flag == '-' && -result < Integer.MIN_VALUE) return Integer.MIN_VALUE;
         }
