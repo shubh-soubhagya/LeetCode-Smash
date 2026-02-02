@@ -16,9 +16,18 @@
 class Solution {
 
     private int postIndex;
+    private Map<Integer, Integer> inorderIndexMap;
 
     public TreeNode buildTree(int[] inorder, int[] postorder) {
+
         postIndex = postorder.length - 1;
+
+        // build value → index map for inorder
+        inorderIndexMap = new HashMap<>();
+        for (int i = 0; i < inorder.length; i++) {
+            inorderIndexMap.put(inorder[i], i);
+        }
+
         return build(inorder, postorder, 0, inorder.length - 1);
     }
 
@@ -31,11 +40,8 @@ class Solution {
         int rootVal = postorder[postIndex--];
         TreeNode root = new TreeNode(rootVal);
 
-        // find root in inorder
-        int index = left;
-        while (inorder[index] != rootVal) {
-            index++;
-        }
+        // O(1) lookup instead of loop
+        int index = inorderIndexMap.get(rootVal);
 
         // IMPORTANT: build right subtree first
         root.right = build(inorder, postorder, index + 1, right);
